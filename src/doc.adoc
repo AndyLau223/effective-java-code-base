@@ -1,0 +1,76 @@
+# Creating and Desctroying Object
+
+This documentation concerns creating and destroying objects: when and how to create them, and how to avoid creating them, how to ensure they are destroyed in a timely manner, and how to manage any cleanup actions that must precede their destruction.
+
+
+## 1.Consider static factory methods instead of constructors
+
+A class can provide a public static factory method, which is simply a static method that returns an instance of the class.
+
+A class can provide its clients with static factory methods instead of, or in addition to, public constructors. Providing a static factory method instead of a public constructor has both advantages and disadvantages.
+
+* **One advantage of static factory methods is that, unlike constructors, they have names**:  If the parameters to a constructor do not, in and of themselves, describe the object being returned, a static factory with a well-chosen name is easier to use and the resulting client code easier to read.
+* **A second advantage of static factory methods is that, unlike constructors, they are not required to create a new object each time they’re invoked**: This allows immutable classes to use preconstructed instances, or to cache instances as they're constructed, and dispense them repeatedly to avoid creating unnecessary duplicate objects.  It can greatly improve performance if equivalent objects are requested often, especially if they are expensive to create.
+** The ability of static factory methods to return the same object from repeated invocations allows classes to maintain strict control over what instances exist at any time. Classes that do this are said to be instance-controlled. There are several reasons to write instance-controlled classes. Instance control allows a class to guarantee that it is a singleton or noninstantiable .
+
+* **A third advantage of static factory methods is that, unlike constructors, they can return an object of any subtype of their return type**: This gives you great flexibility in choosing the class of the returned object.
+** One application of this flexibility is that an API can return objects without making their classes public. Hiding implementation classes in this fashion leads to a very compact API. This technique lends itself to interface-based frameworks, where interfaces provide natural return types for static factory methods. Furthermore, using such a static factory method requires the client to refer to the returned object by interface rather than implementation class, which is generally good practice
+* **A fourth advantage of static factories is that the class of the returned object can vary from call to call as a function of the input parameters**: Any subtype of the declared return type is permissible. The class of the returned object can also vary from release to release.
+* **A fifth advantage of static factories is that the class of the returned object need not exist when the class containing the method is written**: Such flexible static factory methods form the basis of service provider frameworks, like the Java Database Connectivity API (JDBC). A service provider framework is a system in which providers implement a service, and the system makes the implementations available to clients, decoupling the clients from the implementations.
+
+
+we've listed major advantages of static factory method. Now let's have a look at the negative side of this approach.
+
+* **The main limitation of providing only static factory methods is that classes without public or protected constructors cannot be subclassed.**: For example, it is impossible to subclass any of the convenience implementation classes in the Collections Framework. Arguably this can be a blessing in disguise because it encourages programmers to use composition instead of inheritance, and is required for immutable types.
+* **A second shortcoming of static factory methods is that they are hard for programmers to find**:  They do not stand out in API documentation in the way that constructors do, so it can be difficult to figure out how to instantiate a class that provides static factory methods instead of constructors. The Javadoc tool may someday draw attention to static factory methods. In the meantime, you can reduce this problem by drawing attention to static factories in class or interface documentation and by adhering to common naming conventions. Here are some common names for static factory methods. This list is far from exhaustive:
+
+* `form` -- A type-conversion method that takes a single parameter and returns a corresponding instance of this type, for example:
+[source, java]
+----
+Date d = Date.from(instant);
+----
+* `of` -- An aggregation method that makes multiple parameters and returns an instance of this type that incorporates them, for example
+[source, java]
+----
+Set<Rank> faceCards = EnumSet.of(JACK, QUEEN, KING);
+----
+
+* `valueOf` -- A more verbose alternative to `form` and `of`, for example:
+[source, java]
+----
+BigInteger prime = BigInteger.valueOf(Integer.MAX_VALUE);
+----
+
+* `instance` or `getInstance` -- Returns an instance that is described by its parameters(if any) but cannot be said to have the same value, for example:
+[source, java]
+----
+StackWalker luke = StackWalker.getInstance(options);
+----
+
+* `create` or `newInstance` -- Like `instance` or `getInstance`, except that the method guarantees that each call returns a new instance, for example:
+[source, java]
+----
+Object newArray = Array.newInstance(classObject, arrayLen);
+----
+
+* `get`**Type** -- Like `getInstance`, but used if the factory method is in a different class. **Type** is the type of object returned by the factory method, for example
+[source, java]
+----
+FileStore fs = Files.getFileStore(path);
+----
+* ``new``**Type**—Like `newInstance`, but used if the factory method is in a different class. `Type` is the type of object returned by the factory method, for example:
+[source, java]
+----
+BufferedReader br = Files.newBufferedReader(path);
+----
+
+* `type` -- A concise alternative to `get`**Type** and `new`**Type**, for example:
+[source, java]
+----
+List<Complaint> litany = Collections.list(legacyLitany);
+----
+
+### Summary
+In summary, static factory methods and public constructors both have their uses, and it pays to understand their relative merits. Often static factories are preferable, so avoid the reflex to provide public constructors without first considering static factories.
+
+## 2. Consider a builder when faced with many constructor parameters
