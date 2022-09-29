@@ -74,3 +74,12 @@ List<Complaint> litany = Collections.list(legacyLitany);
 In summary, static factory methods and public constructors both have their uses, and it pays to understand their relative merits. Often static factories are preferable, so avoid the reflex to provide public constructors without first considering static factories.
 
 ## 2. Consider a builder when faced with many constructor parameters
+Static factories and constructors share a limitation: they do not scale well to large numbers of optional parameters.
+
+link:../src/creating/and/destroying/objects/items/telescopingconstructor/NutritionFacts.java[Telescoping constuctor pattern -- does not scale well!]--- The telescoping constructor pattern works, but it is hard to write client code when there are many parameters, and harder still to read it.
+
+
+link:../src/creating/and/destroying/objects/items/javabeanpattern/NutritionFacts.java[JavaBeans pattern -- allows inconsistency,mandates mutability] -- Because construction is split across multiple calls, a JavaBean may be in an inconsistent state partway through its construction. Another disadvantage is that the JavaBeans pattern precludes the possibility of making a class immutable and requires added effort on the part of the programmer to ensure thread safety.
+
+
+link:../src/creating/and/destroying/objects/items/builderpattern/NutritionFacts.java[Builder pattern] -- The `NutritionFacts` class is immutable, and all parameter default values are in one place. The builder's setter methods return the builder itself so that invocations can be chained, resulting in a fluent API.

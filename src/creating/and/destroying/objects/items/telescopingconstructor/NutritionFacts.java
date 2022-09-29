@@ -1,4 +1,4 @@
-package creating.and.destroying.objects.items.telescopingconstructor;
+package and.destroying.objects.items.telescopingconstructor;
 
 /**
  * Telescoping constructor pattern - does not scale well, this is anti-pattern!
